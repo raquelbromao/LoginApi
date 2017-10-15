@@ -6,8 +6,16 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var LoginSchema = new Schema({
-    name: String,
-    password: String
+  username: {
+    type: String,
+    unique: true,
+    required: true
+  },
+
+  password: {
+    type: String,
+    required: true
+  }
 });
 
 //  Realiza o salto e criptografa a senha antes de salvar no BD
@@ -28,4 +36,13 @@ LoginSchema.pre('save', function(next){
     });
 });
 
-module.exports = mongoose.model('User', LoginSchema);
+//  Verifica senha
+LoginSchema.methods.verificaSenha = function(password, next) {
+  bcrypt.compare(password, this.password, function(err, isMatch) {
+    if (err) return next(err);
+    //  se isMatch = TRUE -> SUCESSO || = FALSE -> ERRO
+    next(isMatch);
+  });
+};
+
+module.exports = mongoose.model('Usuarios', LoginSchema);
